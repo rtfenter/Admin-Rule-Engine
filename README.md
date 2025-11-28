@@ -1,5 +1,6 @@
 # Admin Rule Engine Playground  
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-000?style=for-the-badge)](https://rtfenter.github.io/Admin-Rule-Engine-Playground/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-000?style=for-the-badge)](https://rtfenter.github.io/Admin-Rule-Engine/)
+
 
 ### A small tool to see how admin-configured rules stack, conflict, and resolve across scenarios.
 
