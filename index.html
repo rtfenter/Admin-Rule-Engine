@@ -16,119 +16,101 @@
       </div>
     </header>
 
-    <main class="board">
-      <section class="board-top">
-        <div class="board-top-inner">
-          <div class="board-top-label">Scenarios</div>
-          <div class="chip-row" id="scenarioChips">
-            <!-- Filled by JS -->
-          </div>
+    <main class="main">
+      <section class="panel panel-left">
+        <div class="panel-header">
+          <h2>Scenario & Rule Packs</h2>
         </div>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <h3 class="section-title">Scenarios</h3>
+            <p class="section-hint">Choose what kind of request you&#39;re testing.</p>
+          </div>
+          <div class="chip-row" id="scenarioChips"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <h3 class="section-title">Rule Packs</h3>
+            <p class="section-hint">Toggle which policies are active.</p>
+          </div>
+          <div class="chip-row chip-row-wrap" id="packChips"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <h3 class="section-title">Active Rule Stack</h3>
+            <p class="section-hint">
+              Combined rules from all active packs, ordered from lowest to highest priority.
+            </p>
+          </div>
+          <div class="rule-stack-summary" id="ruleStackSummary"></div>
+          <div class="rule-stack" id="ruleStack"></div>
+        </section>
       </section>
 
-      <section class="board-main">
-        <!-- Left: Rule Packs + Stack -->
-        <div class="board-column board-column-left">
-          <section class="panel panel-compact">
-            <div class="panel-header">
-              <h2>Rule Packs</h2>
-              <span class="panel-subtitle">Toggle which policies are in play.</span>
-            </div>
-            <div class="chip-row chip-row-wrap" id="packChips">
-              <!-- Filled by JS -->
-            </div>
-          </section>
-
-          <section class="panel rule-stack-panel">
-            <div class="panel-header">
-              <h2>Active Rule Stack</h2>
-              <span class="panel-subtitle">Ordered from lowest to highest priority.</span>
-            </div>
-            <div class="rule-stack-summary" id="ruleStackSummary">
-              <!-- Summary text -->
-            </div>
-            <div class="rule-stack" id="ruleStack">
-              <!-- Rule cards injected here -->
-            </div>
-          </section>
-        </div>
-
-        <!-- Right: Conflict Lanes + Decision -->
-        <div class="board-column board-column-right">
-          <section class="panel conflict-panel">
-            <div class="panel-header">
-              <h2>Conflict Lanes</h2>
-              <div class="panel-actions">
-                <button class="btn btn-secondary" id="resetButton">Reset</button>
-                <button class="btn btn-primary" id="evaluateButton">
-                  Run Evaluation
-                </button>
-              </div>
-            </div>
-            <p class="help-text">
-              Pick a scenario and rule packs, then run evaluation to see which rules apply,
-              how they conflict, and which one wins.
+      <section class="panel panel-right">
+        <div class="panel-header panel-header-right">
+          <div>
+            <h2>Rule Evaluation</h2>
+            <p class="panel-subtitle">
+              Run the selected scenario against your active rule packs.
             </p>
-
-            <div class="lanes">
-              <div class="lane" data-effect="allow">
-                <div class="lane-header">
-                  <span class="lane-dot lane-dot-allow"></span>
-                  <span class="lane-title">Allow / Permit</span>
-                </div>
-                <div class="lane-body" id="laneAllow">
-                  <!-- Allow rules here -->
-                </div>
-              </div>
-
-              <div class="lane" data-effect="deny">
-                <div class="lane-header">
-                  <span class="lane-dot lane-dot-deny"></span>
-                  <span class="lane-title">Deny / Block</span>
-                </div>
-                <div class="lane-body" id="laneDeny">
-                  <!-- Deny rules here -->
-                </div>
-              </div>
-
-              <div class="lane" data-effect="transform">
-                <div class="lane-header">
-                  <span class="lane-dot lane-dot-transform"></span>
-                  <span class="lane-title">Transform / Modify</span>
-                </div>
-                <div class="lane-body" id="laneTransform">
-                  <!-- Transform rules here -->
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel decision-panel">
-            <div class="panel-header">
-              <h2>Decision & Explanation</h2>
-            </div>
-
-            <div class="decision-row">
-              <div class="decision-pill decision-pill-idle" id="decisionPill">
-                <span class="decision-label">Waiting for evaluation</span>
-              </div>
-              <div class="decision-meta" id="decisionMeta">
-                Select a scenario and rule packs, then run evaluation.
-              </div>
-            </div>
-
-            <div class="explanation" id="explanation">
-              <!-- Human-readable explanation -->
-            </div>
-
-            <div class="trace-section">
-              <button class="btn btn-secondary btn-sm" id="toggleTraceButton">
-                Show trace
-              </button>
-              <pre class="trace-log" id="traceLog"></pre>
-            </div>
-          </section>
+          </div>
+          <div class="panel-actions">
+            <button class="btn btn-secondary" id="resetButton">Reset</button>
+            <button class="btn btn-primary" id="evaluateButton">
+              Run Evaluation
+            </button>
+          </div>
         </div>
+
+        <section class="section-block">
+          <div class="summary-row" id="scenarioSummary">
+            <!-- Filled by JS -->
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <h3 class="section-title">Matching Rules</h3>
+            <p class="section-hint">
+              Rules that match this scenario, sorted by priority (lower numbers win).
+            </p>
+          </div>
+
+          <div class="rule-table" id="ruleTable">
+            <!-- Filled by JS -->
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-title-row">
+            <h3 class="section-title">Decision & Explanation</h3>
+          </div>
+
+          <div class="decision-row">
+            <div class="decision-pill decision-pill-idle" id="decisionPill">
+              <span class="decision-label">Waiting for evaluation</span>
+            </div>
+            <div class="decision-meta" id="decisionMeta">
+              Select a scenario and rule packs, then run evaluation.
+            </div>
+          </div>
+
+          <div class="explanation" id="explanation"></div>
+        </section>
+
+        <section class="section-block">
+          <div class="trace-header">
+            <span class="trace-title">Evaluation Trace</span>
+            <button class="btn btn-secondary btn-sm" id="toggleTraceButton">
+              Show trace
+            </button>
+          </div>
+          <pre class="trace-log" id="traceLog"></pre>
+        </section>
       </section>
     </main>
 
