@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Rule Engine Playground</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="page-header">
+      <div class="page-header-inner">
+        <h1>Admin Rule Engine Playground</h1>
+        <p class="tagline">
+          Explore how admin-configured rules stack, conflict, and resolve across environments.
+        </p>
+      </div>
+    </header>
+
+    <main class="board">
+      <section class="board-top">
+        <div class="board-top-inner">
+          <div class="board-top-label">Scenarios</div>
+          <div class="chip-row" id="scenarioChips">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </section>
+
+      <section class="board-main">
+        <!-- Left: Rule Packs + Stack -->
+        <div class="board-column board-column-left">
+          <section class="panel panel-compact">
+            <div class="panel-header">
+              <h2>Rule Packs</h2>
+              <span class="panel-subtitle">Toggle which policies are in play.</span>
+            </div>
+            <div class="chip-row chip-row-wrap" id="packChips">
+              <!-- Filled by JS -->
+            </div>
+          </section>
+
+          <section class="panel rule-stack-panel">
+            <div class="panel-header">
+              <h2>Active Rule Stack</h2>
+              <span class="panel-subtitle">Ordered from lowest to highest priority.</span>
+            </div>
+            <div class="rule-stack-summary" id="ruleStackSummary">
+              <!-- Summary text -->
+            </div>
+            <div class="rule-stack" id="ruleStack">
+              <!-- Rule cards injected here -->
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Conflict Lanes + Decision -->
+        <div class="board-column board-column-right">
+          <section class="panel conflict-panel">
+            <div class="panel-header">
+              <h2>Conflict Lanes</h2>
+              <div class="panel-actions">
+                <button class="btn btn-secondary" id="resetButton">Reset</button>
+                <button class="btn btn-primary" id="evaluateButton">
+                  Run Evaluation
+                </button>
+              </div>
+            </div>
+            <p class="help-text">
+              Pick a scenario and rule packs, then run evaluation to see which rules apply,
+              how they conflict, and which one wins.
+            </p>
+
+            <div class="lanes">
+              <div class="lane" data-effect="allow">
+                <div class="lane-header">
+                  <span class="lane-dot lane-dot-allow"></span>
+                  <span class="lane-title">Allow / Permit</span>
+                </div>
+                <div class="lane-body" id="laneAllow">
+                  <!-- Allow rules here -->
+                </div>
+              </div>
+
+              <div class="lane" data-effect="deny">
+                <div class="lane-header">
+                  <span class="lane-dot lane-dot-deny"></span>
+                  <span class="lane-title">Deny / Block</span>
+                </div>
+                <div class="lane-body" id="laneDeny">
+                  <!-- Deny rules here -->
+                </div>
+              </div>
+
+              <div class="lane" data-effect="transform">
+                <div class="lane-header">
+                  <span class="lane-dot lane-dot-transform"></span>
+                  <span class="lane-title">Transform / Modify</span>
+                </div>
+                <div class="lane-body" id="laneTransform">
+                  <!-- Transform rules here -->
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel decision-panel">
+            <div class="panel-header">
+              <h2>Decision & Explanation</h2>
+            </div>
+
+            <div class="decision-row">
+              <div class="decision-pill decision-pill-idle" id="decisionPill">
+                <span class="decision-label">Waiting for evaluation</span>
+              </div>
+              <div class="decision-meta" id="decisionMeta">
+                Select a scenario and rule packs, then run evaluation.
+              </div>
+            </div>
+
+            <div class="explanation" id="explanation">
+              <!-- Human-readable explanation -->
+            </div>
+
+            <div class="trace-section">
+              <button class="btn btn-secondary btn-sm" id="toggleTraceButton">
+                Show trace
+              </button>
+              <pre class="trace-log" id="traceLog"></pre>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      Admin Rule Engine Playground · Client-side only · No data stored or sent.
+    </footer>
+
+    <script src="app.js"></script>
+  </body>
+</html>
