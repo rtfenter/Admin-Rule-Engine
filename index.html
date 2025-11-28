@@ -22,12 +22,19 @@
           <h2>Scenario & Rule Packs</h2>
         </div>
 
+        <!-- SCENARIOS: NOW A DROPDOWN -->
         <section class="section-block">
           <div class="section-title-row">
             <h3 class="section-title">Scenarios</h3>
             <p class="section-hint">Choose what kind of request you&#39;re testing.</p>
           </div>
-          <div class="chip-row" id="scenarioChips"></div>
+          <div class="field">
+            <label for="scenarioSelect" class="field-label">Scenario</label>
+            <select id="scenarioSelect" class="select">
+              <!-- options filled by JS -->
+            </select>
+          </div>
+          <p class="section-hint" id="scenarioDescription"></p>
         </section>
 
         <section class="section-block">
