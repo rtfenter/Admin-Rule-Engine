@@ -200,37 +200,34 @@ function scenarioMatchesRule(scenario, rule) {
   return rule.tags.every((t) => scenario.tags.includes(t));
 }
 
-// Render: scenario chips
+// Render: scenario dropdown
 
-function renderScenarioChips() {
-  const row = $("#scenarioChips");
-  row.innerHTML = "";
+function renderScenarioSelect() {
+  const select = $("#scenarioSelect");
+  const desc = $("#scenarioDescription");
+  select.innerHTML = "";
 
   SCENARIOS.forEach((scenario) => {
-    const chip = createElem("button", "chip", null);
-    chip.type = "button";
-    chip.dataset.scenarioId = scenario.id;
-    chip.setAttribute("aria-pressed", scenario.id === activeScenarioId);
-
+    const opt = document.createElement("option");
+    opt.value = scenario.id;
+    opt.textContent = scenario.name;
     if (scenario.id === activeScenarioId) {
-      chip.classList.add("chip-active");
+      opt.selected = true;
     }
+    select.appendChild(opt);
+  });
 
-    const main = createElem("span", "chip-label-main", scenario.name);
-    const sub = createElem("span", "chip-label-sub", scenario.description);
-    chip.appendChild(main);
-    chip.appendChild(sub);
+  const current = getScenarioById(activeScenarioId);
+  desc.textContent = current.description;
 
-    chip.addEventListener("click", () => {
-      activeScenarioId = scenario.id;
-      renderScenarioChips();
-      updateScenarioSummary();
-      renderRuleStack();
-      renderRuleTableEmpty();
-      resetDecisionState();
-    });
-
-    row.appendChild(chip);
+  select.addEventListener("change", () => {
+    activeScenarioId = select.value;
+    const scenario = getScenarioById(activeScenarioId);
+    desc.textContent = scenario.description;
+    updateScenarioSummary();
+    renderRuleStack();
+    renderRuleTableEmpty();
+    resetDecisionState();
   });
 }
 
@@ -263,6 +260,7 @@ function renderPackChips() {
       renderRuleStack();
       renderRuleTableEmpty();
       resetDecisionState();
+      updateScenarioSummary();
     });
 
     row.appendChild(chip);
@@ -598,7 +596,7 @@ function reset() {
   activePackIds = new Set(
     RULE_PACKS.filter((p) => p.defaultActive).map((p) => p.id)
   );
-  renderScenarioChips();
+  renderScenarioSelect();
   renderPackChips();
   renderRuleStack();
   updateScenarioSummary();
@@ -621,7 +619,7 @@ function setupTraceToggle() {
 // Init
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderScenarioChips();
+  renderScenarioSelect();
   renderPackChips();
   renderRuleStack();
   updateScenarioSummary();
