@@ -159,6 +159,36 @@ body {
   color: var(--text-muted);
 }
 
+/* Fields / Select */
+
+.field {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.field-label {
+  display: block;
+  font-size: 12px;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.select {
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: #05060b;
+  color: var(--text-main);
+  font-size: 13px;
+  padding: 7px 9px;
+  outline: none;
+}
+
+.select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-soft);
+}
+
 /* Chips */
 
 .chip-row {
