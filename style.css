@@ -173,20 +173,34 @@ body {
   margin-bottom: 4px;
 }
 
+/* Cinematic dropdown to match chips + panels */
 .select {
   width: 100%;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-subtle);
-  background: #05060b;
+  border: 1px solid rgba(64, 70, 90, 0.9);
+  background:
+    linear-gradient(135deg, rgba(13, 16, 26, 0.96), rgba(5, 6, 11, 0.98));
   color: var(--text-main);
   font-size: 13px;
-  padding: 7px 9px;
+  padding: 7px 32px 7px 9px;
   outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  box-shadow: inset 0 0 0 1px rgba(5, 6, 11, 0.9);
+  background-image:
+    linear-gradient(135deg, rgba(13, 16, 26, 0.96), rgba(5, 6, 11, 0.98)),
+    url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a5adbf' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat;
+  background-size: auto, 12px 8px;
+  background-position: left top, calc(100% - 10px) 50%;
 }
 
 .select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent-soft);
+  box-shadow:
+    0 0 0 1px var(--accent-soft),
+    0 0 0 1px rgba(5, 6, 11, 1);
 }
 
 /* Chips */
