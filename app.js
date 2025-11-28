@@ -136,7 +136,7 @@ const SCENARIOS = [
     name: "Sandbox emergency",
     environment: "sandbox",
     tags: ["emergencyOverride"],
-    description: "Sandbox request during incident with emergency flag set."
+    description: "Sandbox request during an incident with emergency flag set."
   },
   {
     id: "legacyPath",
@@ -153,9 +153,8 @@ let activeScenarioId = SCENARIOS[0].id;
 let activePackIds = new Set(
   RULE_PACKS.filter((p) => p.defaultActive).map((p) => p.id)
 );
-let lastEvaluation = null;
 
-// Utility helpers
+// Helpers
 
 function $(selector) {
   return document.querySelector(selector);
@@ -197,15 +196,16 @@ function scenarioMatchesRule(scenario, rule) {
   if (!rule.environments.includes(scenario.environment)) {
     return false;
   }
-  if (rule.tags.length === 0) return true;
+  if (!rule.tags || rule.tags.length === 0) return true;
   return rule.tags.every((t) => scenario.tags.includes(t));
 }
 
-// Rendering: scenario chips
+// Render: scenario chips
 
 function renderScenarioChips() {
   const row = $("#scenarioChips");
   row.innerHTML = "";
+
   SCENARIOS.forEach((scenario) => {
     const chip = createElem("button", "chip", null);
     chip.type = "button";
@@ -224,21 +224,24 @@ function renderScenarioChips() {
     chip.addEventListener("click", () => {
       activeScenarioId = scenario.id;
       renderScenarioChips();
-      updateRuleStackSummary();
+      updateScenarioSummary();
+      renderRuleStack();
+      renderRuleTableEmpty();
+      resetDecisionState();
     });
 
     row.appendChild(chip);
   });
 }
 
-// Rendering: pack chips
+// Render: pack chips
 
 function renderPackChips() {
   const row = $("#packChips");
   row.innerHTML = "";
 
   RULE_PACKS.forEach((pack) => {
-    const chip = createElem("button", "chip chip-secondary", null);
+    const chip = createElem("button", "chip", null);
     chip.type = "button";
     chip.dataset.packId = pack.id;
 
@@ -258,18 +261,21 @@ function renderPackChips() {
       }
       renderPackChips();
       renderRuleStack();
+      renderRuleTableEmpty();
+      resetDecisionState();
     });
 
     row.appendChild(chip);
   });
 }
 
-// Rendering: rule stack
+// Render: rule stack
 
 function updateRuleStackSummary() {
   const summary = $("#ruleStackSummary");
   const scenario = getScenarioById(activeScenarioId);
   const totalPacks = activePackIds.size;
+
   summary.textContent = `Scenario: ${scenario.name} · Environment: ${
     scenario.environment
   } · Tags: ${
@@ -287,7 +293,7 @@ function renderRuleStack() {
   if (!rules.length) {
     const empty = createElem(
       "div",
-      "lane-empty",
+      "rule-table-empty",
       "No active rule packs. Toggle a pack above to populate the stack."
     );
     container.appendChild(empty);
@@ -303,39 +309,20 @@ function renderRuleStack() {
     header.appendChild(name);
     header.appendChild(packBadge);
 
-    const effectTag = createElem(
-      "div",
-      `rule-effect-tag rule-effect-${rule.effect}`,
-      rule.effect === "allow"
-        ? "Allow"
-        : rule.effect === "deny"
-        ? "Deny"
-        : "Transform"
-    );
-
-    const statusTag = createElem(
-      "div",
-      "rule-status-tag",
-      rule.status === "active" ? "Active" : "Draft"
-    );
-
     const metaRow = createElem("div", "rule-meta-row");
-    const scope = createElem(
-      "div",
-      "rule-meta-item",
-      `Scope: ${rule.scope}`
-    );
+    const scope = createElem("div", "rule-meta-item", `Scope: ${rule.scope}`);
     const env = createElem(
       "div",
       "rule-meta-item",
       `Env: ${rule.environments.join(", ")}`
     );
     const tags =
-      rule.tags && rule.tags.length
-        ? rule.tags.join(", ")
-        : "none";
-
-    const tagsEl = createElem("div", "rule-meta-item", `Tags: ${tags}`);
+      rule.tags && rule.tags.length ? rule.tags.join(", ") : "none";
+    const tagsEl = createElem(
+      "div",
+      "rule-meta-item",
+      `Tags: ${tags}`
+    );
     const prio = createElem(
       "div",
       "rule-meta-item",
@@ -347,63 +334,145 @@ function renderRuleStack() {
     metaRow.appendChild(tagsEl);
     metaRow.appendChild(prio);
 
-    const rightCol = createElem("div", null);
-    rightCol.appendChild(effectTag);
-    rightCol.appendChild(statusTag);
-
     card.appendChild(header);
     card.appendChild(metaRow);
-    card.appendChild(rightCol);
 
     container.appendChild(card);
   });
 }
 
-// Rendering: lanes
+// Scenario summary badge row
 
-function clearLane(el) {
-  el.innerHTML = "";
+function updateScenarioSummary() {
+  const summary = $("#scenarioSummary");
+  summary.innerHTML = "";
+
+  const scenario = getScenarioById(activeScenarioId);
+
+  const sBadge = createElem(
+    "div",
+    "summary-badge",
+    `Scenario: ${scenario.name}`
+  );
+  const envBadge = createElem(
+    "div",
+    "summary-badge",
+    `Env: ${scenario.environment}`
+  );
+  const tagText =
+    scenario.tags && scenario.tags.length
+      ? scenario.tags.join(", ")
+      : "none";
+  const tagBadge = createElem(
+    "div",
+    "summary-badge",
+    `Tags: ${tagText}`
+  );
+  const packsBadge = createElem(
+    "div",
+    "summary-badge",
+    `Active packs: ${activePackIds.size}`
+  );
+
+  summary.appendChild(sBadge);
+  summary.appendChild(envBadge);
+  summary.appendChild(tagBadge);
+  summary.appendChild(packsBadge);
 }
 
-function renderLaneRules(laneEl, rules, winnerId) {
-  clearLane(laneEl);
+// Rule table
 
-  if (!rules.length) {
-    const empty = createElem("div", "lane-empty", "No rules matched.");
-    laneEl.appendChild(empty);
+function renderRuleTableHeader(container) {
+  const header = createElem("div", "rule-table-header");
+  header.innerHTML = `
+    <div>Rule</div>
+    <div>Pack</div>
+    <div>Effect</div>
+    <div>Priority</div>
+    <div>Winner</div>
+  `;
+  container.appendChild(header);
+}
+
+function renderRuleTableEmpty() {
+  const container = $("#ruleTable");
+  container.innerHTML = "";
+  const empty = createElem(
+    "div",
+    "rule-table-empty",
+    "Run evaluation to see which rules matched this scenario."
+  );
+  container.appendChild(empty);
+}
+
+function renderRuleTable(matchingRules, winner) {
+  const container = $("#ruleTable");
+  container.innerHTML = "";
+
+  renderRuleTableHeader(container);
+
+  if (!matchingRules.length) {
+    const empty = createElem(
+      "div",
+      "rule-table-empty",
+      "No rules matched this scenario. In a real system, this would fall back to a default policy."
+    );
+    container.appendChild(empty);
     return;
   }
 
-  rules.forEach((rule) => {
-    const pill = createElem("div", "rule-pill");
-    const main = createElem("div", "rule-pill-main");
-    const name = createElem("span", "rule-pill-name", rule.name);
-    const pack = createElem(
-      "span",
-      "rule-pill-pack",
-      rule.packShort || rule.packName
+  matchingRules.forEach((rule) => {
+    const row = createElem("div", "rule-table-row");
+
+    const cellRule = createElem("div", null);
+    const main = createElem("div", "rule-table-cell-main", rule.name);
+    const sub = createElem(
+      "div",
+      "rule-table-cell-sub",
+      `Scope: ${rule.scope}`
     );
-    main.appendChild(name);
-    main.appendChild(pack);
+    cellRule.appendChild(main);
+    cellRule.appendChild(sub);
 
-    const prio = createElem(
-      "span",
-      "rule-pill-priority",
-      `P${rule.priority}`
+    const cellPack = createElem("div", null);
+    cellPack.textContent = rule.packShort || rule.packName;
+
+    const cellEffect = createElem("div", null);
+    const effectTag = createElem(
+      "div",
+      "rule-table-effect " +
+        (rule.effect === "allow"
+          ? "rule-table-effect-allow"
+          : rule.effect === "deny"
+          ? "rule-table-effect-deny"
+          : "rule-table-effect-transform"),
+      rule.effect === "allow"
+        ? "Allow"
+        : rule.effect === "deny"
+        ? "Deny"
+        : "Transform"
     );
+    cellEffect.appendChild(effectTag);
 
-    pill.appendChild(main);
-    pill.appendChild(prio);
+    const cellPriority = createElem("div", null, `P${rule.priority}`);
 
-    if (rule.id === winnerId) {
-      pill.classList.add("rule-pill-winner");
+    const cellWinner = createElem("div", null);
+    if (winner && winner.id === rule.id) {
+      const w = createElem("span", "rule-table-winner", "Winner");
+      cellWinner.appendChild(w);
     }
 
-    laneEl.appendChild(pill);
+    row.appendChild(cellRule);
+    row.appendChild(cellPack);
+    row.appendChild(cellEffect);
+    row.appendChild(cellPriority);
+    row.appendChild(cellWinner);
+
+    container.appendChild(row);
   });
 }
 
-// Decision and explanation
+// Decision state
 
 function setDecisionState(effect, explanationText, metaText, traceLines) {
   const pill = $("#decisionPill");
@@ -430,8 +499,16 @@ function setDecisionState(effect, explanationText, metaText, traceLines) {
 
   meta.textContent = metaText || "";
   explanation.textContent = explanationText || "";
-
   traceLog.textContent = (traceLines || []).join("\n");
+}
+
+function resetDecisionState() {
+  setDecisionState(
+    null,
+    "",
+    "Select a scenario and rule packs, then run evaluation.",
+    []
+  );
 }
 
 // Evaluation
@@ -446,7 +523,9 @@ function runEvaluation() {
       ", "
     )}])`
   );
-  trace.push(`Active rule packs: ${Array.from(activePackIds).join(", ") || "none"}`);
+  trace.push(
+    `Active rule packs: ${Array.from(activePackIds).join(", ") || "none"}`
+  );
   trace.push("");
 
   const matchingRules = allRules.filter((rule) => {
@@ -464,12 +543,6 @@ function runEvaluation() {
       : "No rules matched this scenario."
   );
 
-  const lanes = {
-    allow: matchingRules.filter((r) => r.effect === "allow"),
-    deny: matchingRules.filter((r) => r.effect === "deny"),
-    transform: matchingRules.filter((r) => r.effect === "transform")
-  };
-
   let winner = null;
   if (matchingRules.length) {
     winner = matchingRules.reduce((best, rule) =>
@@ -480,14 +553,7 @@ function runEvaluation() {
     );
   }
 
-  // Render lanes
-  renderLaneRules($("#laneAllow"), lanes.allow, winner && winner.effect === "allow" ? winner.id : null);
-  renderLaneRules($("#laneDeny"), lanes.deny, winner && winner.effect === "deny" ? winner.id : null);
-  renderLaneRules(
-    $("#laneTransform"),
-    lanes.transform,
-    winner && winner.effect === "transform" ? winner.id : null
-  );
+  renderRuleTable(matchingRules, winner);
 
   // Decision text
   let effect = null;
@@ -496,9 +562,10 @@ function runEvaluation() {
 
   if (!matchingRules.length) {
     effect = null;
-    metaText = "No rules matched this scenario. Check environments, tags, or active packs.";
+    metaText =
+      "No rules matched this scenario. Check environments, tags, or which packs are active.";
     explanationText =
-      "With the current scenario and rule packs, no rule produced a decision. In a real system, this would typically fall back to a default policy.";
+      "With the current scenario and rule packs, no rule produced a decision. In a real system, a default or fallback policy would usually decide what happens next.";
   } else {
     effect = winner.effect;
     const losing = matchingRules.filter((r) => r.id !== winner.id);
@@ -522,7 +589,6 @@ function runEvaluation() {
   }
 
   setDecisionState(effect, explanationText, metaText, trace);
-  lastEvaluation = { scenario, matchingRules, winner };
 }
 
 // Reset
@@ -535,15 +601,9 @@ function reset() {
   renderScenarioChips();
   renderPackChips();
   renderRuleStack();
-  renderLaneRules($("#laneAllow"), [], null);
-  renderLaneRules($("#laneDeny"), [], null);
-  renderLaneRules($("#laneTransform"), [], null);
-  setDecisionState(
-    null,
-    "",
-    "Select a scenario and rule packs, then run evaluation.",
-    []
-  );
+  updateScenarioSummary();
+  renderRuleTableEmpty();
+  resetDecisionState();
 }
 
 // Trace toggle
@@ -564,15 +624,9 @@ document.addEventListener("DOMContentLoaded", () => {
   renderScenarioChips();
   renderPackChips();
   renderRuleStack();
-  renderLaneRules($("#laneAllow"), [], null);
-  renderLaneRules($("#laneDeny"), [], null);
-  renderLaneRules($("#laneTransform"), [], null);
-  setDecisionState(
-    null,
-    "",
-    "Select a scenario and rule packs, then run evaluation.",
-    []
-  );
+  updateScenarioSummary();
+  renderRuleTableEmpty();
+  resetDecisionState();
 
   $("#evaluateButton").addEventListener("click", runEvaluation);
   $("#resetButton").addEventListener("click", reset);
