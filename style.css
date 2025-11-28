@@ -178,6 +178,7 @@ body {
   width: 100%;
   border-radius: var(--radius-md);
   border: 1px solid rgba(64, 70, 90, 0.9);
+  border-left: 3px solid var(--accent);
   background:
     linear-gradient(135deg, rgba(13, 16, 26, 0.96), rgba(5, 6, 11, 0.98));
   color: var(--text-main);
