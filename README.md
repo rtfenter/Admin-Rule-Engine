@@ -42,7 +42,8 @@ All text inputs are replaced with **loadable scenarios** and **preset rule packs
 
 ## Demo Screenshot
 
-_Screenshot will be added after the first UI pass is implemented._
+<img width="2806" height="2160" alt="Screenshot 2025-11-28 at 16-43-26 Admin Rule Engine Playground" src="https://github.com/user-attachments/assets/e48ed457-2cbe-4a8e-841e-8f54e63b69cb" />
+
 
 ---
 
@@ -127,7 +128,7 @@ https://github.com/rtfenter/Applied-Intelligence-Systems-Series
 
 ## Status  
 
-MVP is planned and in progress.  
+MVP is implemented and active.  
 The initial UI will focus on **preset rule packs + canned scenarios**, with logic and visualization layered in iteratively.
 
 ---
