@@ -123,7 +123,8 @@ This prototype builds a legible slice of that full rule engine lifecycle.
 ## Part of the Applied Intelligence Systems Series
 
 Main repo:  
-https://github.com/rtfenter/Platform-Systems-Internal-Tooling-Series/tree/main
+https://github.com/rtfenter/Platform-Systems-Internal-Tooling-Series
+
 
 ---
 
